@@ -2,7 +2,7 @@ import React from "react";
 import Select from 'react-select';
 import { Link } from "react-router-dom";
 import axios from "axios";
-import { buscar } from '../../../Services/branch';
+import { getBranchs } from '../../../Services/branch';
 
 const headers = {
   Accept: "application/json",
@@ -131,7 +131,7 @@ export default class ModPRs extends React.Component {
   async handleGetListBranch ()  {
 
     try {
-      let result = await buscar();
+      let result = await getBranchs();
       console.log(result)
       let branches =[];
       result.branches.forEach(function(branch) {

@@ -2,7 +2,7 @@ import React from "react";
 import Select from 'react-select';
 import { Link } from "react-router-dom";
 import axios from "axios";
-import { buscar } from '../../../Services/branch';
+import { getBranchs, getCommitsfromBranch } from '../../../Services/branch';
 
 export default class ModBranch extends React.Component {
 
@@ -25,7 +25,7 @@ export default class ModBranch extends React.Component {
 
   async handleGetListBranch ()  {
     try {
-      let result = await buscar();
+      let result = await getBranchs();
       console.log(result)
       let branches =[];
       result.branches.forEach(function(branch) {
@@ -57,17 +57,13 @@ export default class ModBranch extends React.Component {
     
     try {
       this.setState({commits:[],showCommits:false})
-      await axios.get(
-        `http://localhost:8000/api/v1/branch/`+branch+`/commits/`
-      ).then((listBranh) => {
-        console.log(listBranh)
-        this.setState({
-          commits:listBranh.data,
-          showCommits:true
-        })
+      let result = await getCommitsfromBranch(branch);
+      this.setState({
+        commits:result,
+        showCommits:true
       });
     }catch (error) {
-
+      alert("Ocurrió un error al solicitar el servicio");
     }
   }
 
