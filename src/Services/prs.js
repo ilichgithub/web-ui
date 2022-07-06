@@ -39,3 +39,18 @@ export const getPullRequests = async ()  => {
     return resultado;
   };
   
+
+  export const changeStatusPrs = async (id,datos) => {
+
+    var opciones = {
+      method: "PUT",
+      headers: headers,
+      body: JSON.stringify(datos),
+      redirect: "follow",
+    };
+    
+    var resultado = await fetch(`${proxy.url}/prs/update-partial/`+id+`/`, opciones);
+    if (!resultado.ok) throw new Error("Error al realizar la petición");
+    return resultado;
+  };
+  

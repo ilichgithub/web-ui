@@ -1,14 +1,10 @@
 import React from "react";
 import Select from 'react-select';
 import { Link } from "react-router-dom";
-import axios from "axios";
 import { getBranchs } from '../../../Services/branch';
-import { getPullRequests, createPullRequest } from '../../../Services/prs';
+import { getPullRequests, createPullRequest, changeStatusPrs } from '../../../Services/prs';
 
-const headers = {
-  Accept: "application/json",
-  "content-type": "application/json",
-};
+
 
 
 export default class ModPRs extends React.Component {
@@ -83,7 +79,7 @@ export default class ModPRs extends React.Component {
       status: this.state.status,
     }
     try {
-      let result = await createPullRequest(datos);
+       await createPullRequest(datos);
       this.handleGetListPRs();
     } catch (error) {
       alert("Ocurrió un error al solicitar el servicio");
@@ -101,18 +97,12 @@ export default class ModPRs extends React.Component {
     let datos={
       status: status
     }
-
-    let request = await axios({
-      method: "put",
-      headers,
-      url: `http://127.0.0.1:8000/api/v1/prs/update-partial/`+id+`/`,
-      data: datos
-    });
-    console.log(request)
-    if(request.status<400){
+    
+    try {
+       await changeStatusPrs(id,datos);
       this.handleGetListPRs();
-    }else{
-      console.log(request)
+    } catch (error) {
+      alert("Ocurrió un error al solicitar el servicio");
     }
 
   }
