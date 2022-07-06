@@ -1,0 +1,292 @@
+import React from "react";
+import Select from 'react-select';
+import { Link } from "react-router-dom";
+import axios from "axios";
+import { buscar } from '../../../Services/branch';
+
+const headers = {
+  Accept: "application/json",
+  "content-type": "application/json",
+};
+
+
+export default class ModPRs extends React.Component {
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      listBranch:[],
+      branchSourceSelect:"-",
+      branchDestinySelect:"-",
+      prs:[],
+      showPrs:false,
+      branchSource: "",
+      branchDestiny: "",
+      author: "",
+      title: "",
+      description: "",
+      status: "OPEN",
+      addPrs: false,
+      buttonStatus: true
+    };
+    this.handleGetListPRs = this.handleGetListPRs.bind(this);
+    this.handleInputTexto = this.handleInputTexto.bind(this);
+    this.handleFormAddPrs = this.handleFormAddPrs.bind(this);
+    this.handlePostPR = this.handlePostPR.bind(this);
+    this.handleRefreshPR = this.handleRefreshPR.bind(this);
+    this.handlePostRefreshPR = this.handlePostRefreshPR.bind(this);
+    this.handleGetListBranch = this.handleGetListBranch.bind(this);
+    this.handleSelectSource = this.handleSelectSource.bind(this);
+    this.handleSelectDestiny = this.handleSelectDestiny.bind(this);
+    this.handleValidationCreate = this.handleValidationCreate.bind(this);
+    
+  }
+
+  componentDidMount(){
+    this.handleGetListPRs();
+    this.handleGetListBranch();
+  }
+
+  async handleGetListPRs ()  {
+
+    let request = await axios({
+      method: "get",
+      headers,
+      url: `http://127.0.0.1:8000/api/v1/prs`,
+    });
+
+    if(request.status===200){
+      console.log(request.data)
+      this.setState({
+        prs:request.data,
+        showPrs:true
+      })
+    }else{
+      console.log("request")
+    }
+
+  }
+
+  handleInputTexto(event) {
+    const target = event.target;
+    const value = target.value;
+    const name = target.name;
+    this.setState({ [name]: value });
+    this.handleValidationCreate();
+  }
+
+  handleFormAddPrs() {
+    this.setState({addPrs:!this.state.addPrs})
+  }
+
+  async handlePostPR ()  {
+    let datos={
+      branchSource: this.state.branchSource,
+      branchDestiny: this.state.branchDestiny,
+      author: this.state.author,
+      title: this.state.title,
+      description: this.state.description,
+      status: this.state.status,
+    }
+
+    let request = await axios({
+      method: "post",
+      headers,
+      url: `http://127.0.0.1:8000/api/v1/prs`,
+      data: datos
+    });
+    console.log(request)
+    if(request.status<400){
+      this.handleGetListPRs();
+    }else{
+      console.log(request)
+    }
+
+  }
+
+  handleRefreshPR(id,status) {
+    this.handlePostRefreshPR(id,status);
+  }
+
+  async handlePostRefreshPR (id,status)  {
+    let datos={
+      status: status
+    }
+
+    let request = await axios({
+      method: "put",
+      headers,
+      url: `http://127.0.0.1:8000/api/v1/prs/update-partial/`+id+`/`,
+      data: datos
+    });
+    console.log(request)
+    if(request.status<400){
+      this.handleGetListPRs();
+    }else{
+      console.log(request)
+    }
+
+  }
+
+  async handleGetListBranch ()  {
+
+    try {
+      let result = await buscar();
+      console.log(result)
+      let branches =[];
+      result.branches.forEach(function(branch) {
+        if(branch!=="HEAD"){
+          branches.push({
+            label : branch,
+            value: branch,
+          })
+        }
+      })
+      this.setState({
+        listBranch: branches,
+      });
+    } catch (error) {
+      alert("Ocurrió un error al solicitar el servicio");
+    }
+
+  }
+
+  handleSelectSource = selectedOption => {
+    this.setState({ branchSourceSelect: selectedOption });
+    this.setState({ branchSource: selectedOption.value });
+    
+    this.handleValidationCreate();
+  };
+
+  handleSelectDestiny = selectedOption => {
+    this.setState({ branchDestinySelect: selectedOption });
+    this.setState({ branchDestiny: selectedOption.value });
+    
+    this.handleValidationCreate();
+  };
+
+  handleValidationCreate = () => {
+    if (
+      this.state.branchSource != "" && 
+      this.state.branchDestiny != "" &&
+      this.state.author != "" && 
+      this.state.title != "" && 
+      this.state.description != "" && 
+      this.state.status != ""  && 
+      this.state.branchSource != this.state.branchDestiny
+    ) {
+      this.setState({buttonStatus:false});
+    }else{
+      this.setState({buttonStatus:true});}
+  };
+
+
+  render() {
+
+    return (
+      <div className="container form-control-sm" id="prs">
+        <div className="jumbotron pt-3 pb-4 mb-3 border ">
+          <h1 className="display-5 mb-4 text-center">Proyecto GitPython - Modulo PRs</h1>
+          <hr className="my-4"></hr>
+          <div className="row">
+            <div className="col-sm-2">
+              <button className="btn btn-primary btn-block" onClick={this.handleFormAddPrs}>Agregar</button>
+            </div>
+            <div className="col-sm-8">
+            </div>
+            <div className="col-sm-2">
+              <Link className="btn btn-primary btn-block" to="/">
+                volver
+              </Link>
+            </div>
+          </div>
+          { this.state.addPrs ? <div>
+            <br />
+            <div className="row">
+              <div className="col-sm-4">
+                <Select value={this.state.branchSourceSelect} options={this.state.listBranch} name="branchSourceSelect" onChange={this.handleSelectSource} />
+              </div>
+              <div className="col-sm-4">
+                <Select value={this.state.branchDestinySelect} options={this.state.listBranch} name="branchDestinySelect" onChange={this.handleSelectDestiny} />
+              </div>
+              <div className="col-sm-4">
+                <input
+                  type="text"
+                  value={this.state.author}
+                  name="author"
+                  onChange={this.handleInputTexto}
+                  className="form-control form-control-sm"
+                  placeholder="Autor"
+                />
+              </div>
+            </div>
+            <br />
+            <br />
+            <div className="row">
+              <div className="col-sm-4">
+                <input
+                  type="text"
+                  value={this.state.title}
+                  name="title"
+                  onChange={this.handleInputTexto}
+                  className="form-control form-control-sm"
+                  placeholder="Titulo"
+                />
+              </div>
+              <div className="col-sm-4">
+                <input
+                  type="text"
+                  value={this.state.description}
+                  name="description"
+                  onChange={this.handleInputTexto}
+                  className="form-control form-control-sm"
+                  placeholder="descripcion"
+                />
+              </div>
+              <div className="col-sm-4">
+              </div>
+            </div>
+            <br />
+            <br />
+            <button className="btn btn-primary btn-block" onClick={this.handlePostPR} disabled={this.state.buttonStatus}>crear</button>    
+          </div> : <br /> }
+          <br /> 
+          { this.state.showPrs ? 
+          <div className="table-responsive" style={{ height: "auto" }}>
+            <table className="table table-sm table-hover table-bordered mb-1 mt-2 text-center">
+              <thead>
+                <tr className="thead-light">
+                  <th scope="col">Origen</th>
+                  <th scope="col">Destino</th>
+                  <th scope="col">Autor</th>
+                  <th scope="col">titulo</th>
+                  <th scope="col">observacion</th>
+                  <th scope="col">Estado</th>
+                  <th scope="col">Cerrar</th>
+                  <th scope="col">Combinar</th>
+                </tr>
+              </thead>
+              <tbody>
+                { this.state.prs.map( pr =>
+                  <tr className="table-success" id={pr.id}>
+                    <td className="text-nowrap  align-middle">{pr.branchSource}</td>
+                    <td className="text-nowrap  align-middle">{pr.branchDestiny}</td>
+                    <td className="text-nowrap  align-middle">{pr.author}</td>
+                    <td className="text-nowrap  align-middle">{pr.title}</td>
+                    <td className="text-nowrap  align-middle">{pr.description}</td>
+                    <td className="text-nowrap  align-middle">{pr.status}</td>
+                    <td className="text-nowrap  align-middle">{pr.status === "OPEN" ? <button className="btn btn-secondary btn-block" value={pr.id} onClick={e => this.handleRefreshPR(e.target.value,"CLOSED")}>Cerrar</button> : <button className="btn btn-info btn-block"  value={pr.id} onClick={e => this.handleRefreshPR(e.target.value,"OPEN")} >Abrir</button> }</td>
+                    <td className="text-nowrap  align-middle"><button className="btn btn-success btn-block">Combinar</button></td>
+                  </tr>)
+                }
+              </tbody>
+            </table>
+          </div> : 
+          <br />
+          }
+
+        </div>
+      </div>
+    );
+  }
+}
