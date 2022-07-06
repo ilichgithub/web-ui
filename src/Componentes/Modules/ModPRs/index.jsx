@@ -3,6 +3,7 @@ import Select from 'react-select';
 import { Link } from "react-router-dom";
 import axios from "axios";
 import { getBranchs } from '../../../Services/branch';
+import { getPullRequests, createPullRequest } from '../../../Services/prs';
 
 const headers = {
   Accept: "application/json",
@@ -47,22 +48,15 @@ export default class ModPRs extends React.Component {
     this.handleGetListBranch();
   }
 
-  async handleGetListPRs ()  {
-
-    let request = await axios({
-      method: "get",
-      headers,
-      url: `http://127.0.0.1:8000/api/v1/prs`,
-    });
-
-    if(request.status===200){
-      console.log(request.data)
+  async handleGetListPRs ()  {    
+    try {
+      let result = await getPullRequests();
       this.setState({
-        prs:request.data,
+        prs:result,
         showPrs:true
-      })
-    }else{
-      console.log("request")
+      });
+    } catch (error) {
+      alert("Ocurrió un error al solicitar el servicio");
     }
 
   }
@@ -88,19 +82,14 @@ export default class ModPRs extends React.Component {
       description: this.state.description,
       status: this.state.status,
     }
-
-    let request = await axios({
-      method: "post",
-      headers,
-      url: `http://127.0.0.1:8000/api/v1/prs`,
-      data: datos
-    });
-    console.log(request)
-    if(request.status<400){
+    try {
+      let result = await createPullRequest(datos);
       this.handleGetListPRs();
-    }else{
-      console.log(request)
+    } catch (error) {
+      alert("Ocurrió un error al solicitar el servicio");
     }
+
+
 
   }
 
@@ -167,13 +156,13 @@ export default class ModPRs extends React.Component {
 
   handleValidationCreate = () => {
     if (
-      this.state.branchSource != "" && 
-      this.state.branchDestiny != "" &&
-      this.state.author != "" && 
-      this.state.title != "" && 
-      this.state.description != "" && 
-      this.state.status != ""  && 
-      this.state.branchSource != this.state.branchDestiny
+      this.state.branchSource !== "" && 
+      this.state.branchDestiny !== "" &&
+      this.state.author !== "" && 
+      this.state.title !== "" && 
+      this.state.description !== "" && 
+      this.state.status !== ""  && 
+      this.state.branchSource !== this.state.branchDestiny
     ) {
       this.setState({buttonStatus:false});
     }else{
