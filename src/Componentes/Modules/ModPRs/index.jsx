@@ -3,6 +3,7 @@ import Select from 'react-select';
 import { Link } from "react-router-dom";
 import { getBranchs } from '../../../Services/branch';
 import { getPullRequests, createPullRequest, changeStatusPrs } from '../../../Services/prs';
+import ModalLoading from "../../Modals/ModalLoading";
 
 
 
@@ -12,6 +13,7 @@ export default class ModPRs extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      modalLoading: false,
       listBranch:[],
       branchSourceSelect:"-",
       branchDestinySelect:"-",
@@ -46,12 +48,15 @@ export default class ModPRs extends React.Component {
 
   async handleGetListPRs ()  {    
     try {
+      this.setState({modalLoading:true})
       let result = await getPullRequests();
       this.setState({
         prs:result,
         showPrs:true
       });
+      this.setState({modalLoading:false})
     } catch (error) {
+      this.setState({modalLoading:false})
       alert("Ocurrió un error al solicitar el servicio");
     }
 
@@ -79,9 +84,12 @@ export default class ModPRs extends React.Component {
       status: this.state.status,
     }
     try {
+      this.setState({modalLoading:true})
        await createPullRequest(datos);
+       this.setState({modalLoading:false})
       this.handleGetListPRs();
     } catch (error) {
+      this.setState({modalLoading:false})
       alert("Ocurrió un error al solicitar el servicio");
     }
 
@@ -99,9 +107,12 @@ export default class ModPRs extends React.Component {
     }
     
     try {
+      this.setState({modalLoading:true})
        await changeStatusPrs(id,datos);
+       this.setState({modalLoading:false})
       this.handleGetListPRs();
     } catch (error) {
+      this.setState({modalLoading:false})
       alert("Ocurrió un error al solicitar el servicio");
     }
 
@@ -110,6 +121,7 @@ export default class ModPRs extends React.Component {
   async handleGetListBranch ()  {
 
     try {
+      this.setState({modalLoading:true})
       let result = await getBranchs();
       console.log(result)
       let branches =[];
@@ -124,7 +136,9 @@ export default class ModPRs extends React.Component {
       this.setState({
         listBranch: branches,
       });
+      this.setState({modalLoading:false})
     } catch (error) {
+      this.setState({modalLoading:false})
       alert("Ocurrió un error al solicitar el servicio");
     }
 
@@ -263,6 +277,7 @@ export default class ModPRs extends React.Component {
           </div> : 
           <br />
           }
+          <ModalLoading modalListarLoading={this.state.modalLoading} />
 
         </div>
       </div>

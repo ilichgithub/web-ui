@@ -1,14 +1,15 @@
 import React from "react";
 import Select from 'react-select';
 import { Link } from "react-router-dom";
-import axios from "axios";
 import { getBranchs, getCommitsfromBranch } from '../../../Services/branch';
+import ModalLoading from "../../Modals/ModalLoading";
 
 export default class ModBranch extends React.Component {
 
   constructor(props) {
     super(props);
     this.state = {
+      modalLoading: false,
       listBranch:[],
       commits:[],
       showCommits:false,
@@ -25,6 +26,7 @@ export default class ModBranch extends React.Component {
 
   async handleGetListBranch ()  {
     try {
+      this.setState({modalLoading:true})
       let result = await getBranchs();
       console.log(result)
       let branches =[];
@@ -39,7 +41,9 @@ export default class ModBranch extends React.Component {
       this.setState({
         listBranch: branches,
       });
+      this.setState({modalLoading:false})
     } catch (error) {
+      this.setState({modalLoading:false})
       alert("Ocurrió un error al solicitar el servicio");
     }
 
@@ -56,13 +60,16 @@ export default class ModBranch extends React.Component {
   async handleGetListCommits (branch)  {
     
     try {
+      this.setState({modalLoading:true})
       this.setState({commits:[],showCommits:false})
       let result = await getCommitsfromBranch(branch);
       this.setState({
         commits:result,
         showCommits:true
       });
+      this.setState({modalLoading:false})
     }catch (error) {
+      this.setState({modalLoading:false})
       alert("Ocurrió un error al solicitar el servicio");
     }
   }
@@ -115,7 +122,7 @@ export default class ModBranch extends React.Component {
           </div> : 
           <br />
           }
-
+          <ModalLoading modalListarLoading={this.state.modalLoading} />
         </div>
       </div>
     );
