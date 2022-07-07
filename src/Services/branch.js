@@ -15,7 +15,7 @@ export const getBranchs = async ()  => {
 
     let response = undefined;
     response = await fetch(
-      `${proxy.url}/branch`,
+      `${proxy.url}/branches/`,
       request
     );
 
@@ -34,7 +34,7 @@ export const getBranchs = async ()  => {
 
     let response = undefined;
     response = await fetch(
-    `${proxy.url}/branch/`+branch+`/commits/`,
+    `${proxy.url}/branches/`+branch+`/commits`,
     request
     );
 

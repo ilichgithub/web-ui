@@ -34,7 +34,7 @@ export const getPullRequests = async ()  => {
       redirect: "follow",
     };
     
-    var resultado = await fetch(`${proxy.url}/prs`, opciones);
+    var resultado = await fetch(`${proxy.url}/prs/`, opciones);
     if (!resultado.ok) throw new Error("Error al realizar la petición");
     return resultado;
   };
@@ -43,7 +43,7 @@ export const getPullRequests = async ()  => {
   export const changeStatusPrs = async (id,datos) => {
 
     var opciones = {
-      method: "PUT",
+      method: "PATCH",
       headers: headers,
       body: JSON.stringify(datos),
       redirect: "follow",

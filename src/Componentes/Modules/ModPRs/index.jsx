@@ -71,8 +71,8 @@ export default class ModPRs extends React.Component {
 
   async handlePostPR ()  {
     let datos={
-      branchSource: this.state.branchSource,
-      branchDestiny: this.state.branchDestiny,
+      branch_source: this.state.branchSource,
+      branch_destiny: this.state.branchDestiny,
       author: this.state.author,
       title: this.state.title,
       description: this.state.description,
@@ -248,8 +248,8 @@ export default class ModPRs extends React.Component {
               <tbody>
                 { this.state.prs.map( pr =>
                   <tr className="table-success" id={pr.id}>
-                    <td className="text-nowrap  align-middle">{pr.branchSource}</td>
-                    <td className="text-nowrap  align-middle">{pr.branchDestiny}</td>
+                    <td className="text-nowrap  align-middle">{pr.branch_source}</td>
+                    <td className="text-nowrap  align-middle">{pr.branch_destiny}</td>
                     <td className="text-nowrap  align-middle">{pr.author}</td>
                     <td className="text-nowrap  align-middle">{pr.title}</td>
                     <td className="text-nowrap  align-middle">{pr.description}</td>
