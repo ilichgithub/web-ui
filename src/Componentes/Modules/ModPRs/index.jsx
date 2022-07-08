@@ -2,7 +2,7 @@ import React from "react";
 import Select from 'react-select';
 import { Link } from "react-router-dom";
 import { getBranchs } from '../../../Services/branch';
-import { getPullRequests, createPullRequest, changeStatusPrs } from '../../../Services/prs';
+import { getPullRequests, createPullRequest, changeStatusPrs, mergeChangeStatusPrs } from '../../../Services/prs';
 import ModalLoading from "../../Modals/ModalLoading";
 
 
@@ -38,6 +38,7 @@ export default class ModPRs extends React.Component {
     this.handleSelectSource = this.handleSelectSource.bind(this);
     this.handleSelectDestiny = this.handleSelectDestiny.bind(this);
     this.handleValidationCreate = this.handleValidationCreate.bind(this);
+    this.handleMerge = this.handleMerge.bind(this);
     
   }
 
@@ -109,6 +110,26 @@ export default class ModPRs extends React.Component {
     try {
       this.setState({modalLoading:true})
        await changeStatusPrs(id,datos);
+       this.setState({modalLoading:false})
+      this.handleGetListPRs();
+    } catch (error) {
+      this.setState({modalLoading:false})
+      alert("Ocurrió un error al solicitar el servicio");
+    }
+
+  }
+  
+
+  async handleMerge (id,status,origen,destino)  {
+    let datos={
+      status: status,
+      branch_source: origen,
+      branch_destiny: destino,
+    }
+    
+    try {
+      this.setState({modalLoading:true})
+       await mergeChangeStatusPrs(id,datos);
        this.setState({modalLoading:false})
       this.handleGetListPRs();
     } catch (error) {
@@ -268,8 +289,8 @@ export default class ModPRs extends React.Component {
                     <td className="text-nowrap  align-middle">{pr.title}</td>
                     <td className="text-nowrap  align-middle">{pr.description}</td>
                     <td className="text-nowrap  align-middle">{pr.status}</td>
-                    <td className="text-nowrap  align-middle">{pr.status === "OPEN" ? <button className="btn btn-secondary btn-block" value={pr.id} onClick={e => this.handleRefreshPR(e.target.value,"CLOSED")}>Cerrar</button> : <button className="btn btn-info btn-block"  value={pr.id} onClick={e => this.handleRefreshPR(e.target.value,"OPEN")} >Abrir</button> }</td>
-                    <td className="text-nowrap  align-middle"><button className="btn btn-success btn-block">Combinar</button></td>
+                    <td className="text-nowrap  align-middle">{pr.status === "OPEN" ? <button className="btn btn-secondary btn-block" value={pr.id} onClick={e => this.handleRefreshPR(e.target.value,"CLOSED")}  disabled={pr.status!=="OPEN"}>Cerrar</button> : <button className="btn btn-info btn-block"  value={pr.id} onClick={e => this.handleRefreshPR(e.target.value,"OPEN")} disabled={pr.status!=="CLOSED"} >Abrir</button> }</td>
+                    <td className="text-nowrap  align-middle"><button className="btn btn-success btn-block" value={pr.id} disabled={pr.status!=="OPEN"} onClick={e => this.handleMerge(e.target.value,"MERGE",pr.branch_source,pr.branch_destiny)}>Combinar</button></td>
                   </tr>)
                 }
               </tbody>

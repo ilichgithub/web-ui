@@ -53,4 +53,18 @@ export const getPullRequests = async ()  => {
     if (!resultado.ok) throw new Error("Error al realizar la petición");
     return resultado;
   };
+
+  export const mergeChangeStatusPrs = async (id,datos) => {
+
+    var opciones = {
+      method: "PATCH",
+      headers: headers,
+      body: JSON.stringify(datos),
+      redirect: "follow",
+    };
+    
+    var resultado = await fetch(`${proxy.url}/prs/merge/`+id+`/`, opciones);
+    if (!resultado.ok) throw new Error("Error al realizar la petición");
+    return resultado;
+  };
   
